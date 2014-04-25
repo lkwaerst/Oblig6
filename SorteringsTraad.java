@@ -1,11 +1,13 @@
 class SorteringsTraad extends Thread {
     
+    private Kontroll k;
     private String[] ord;
     private volatile SorteringsTraad flettePartner;
     private volatile boolean ferdig;
 
-    SorteringsTraad(String[] ord) {
+    SorteringsTraad(String[] ord, Kontroll k) {
 	this.ord = ord;
+	this.k = k;
     }
 
     public void run() {
@@ -14,6 +16,7 @@ class SorteringsTraad extends Thread {
 	    sortert[finnPlass(ord[i])] = ord[i];
 	}
 	ferdig = true;
+	notifyAll();
     }
 
     //finner hvilken plass et ord skal vaere paa ved aa telle ant compareTo kall som er > 0
