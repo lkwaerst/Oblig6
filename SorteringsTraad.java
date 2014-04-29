@@ -10,7 +10,7 @@ class SorteringsTraad extends Thread {
 	this.k = k;
     }
 
-    public void run() {
+    public synchronized void run() {
 	String[] sortert = new String[ord.length];
 	for (int i = 0; i < ord.length; i++) {
 	    sortert[finnPlass(ord[i])] = ord[i];

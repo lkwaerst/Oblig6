@@ -51,7 +51,7 @@ class Kontroll extends Thread{
 	}
     }
 
-    private void sorter() {
+    private synchronized void sorter() {
 	boolean ferdigSortert = false;
 	for (int i = 0; i < sorteringstraader.length; i++) {
 	    sorteringstraader[i].start();
