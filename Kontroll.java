@@ -3,29 +3,28 @@ import java.util.*;
 import java.io.*;
 class Kontroll extends Thread{
 
-    int antTraader;
+    static int antTraader;
     File inFil;
     File utFil;
     String[] alleOrd;
     SorteringsTraad[] sorteringstraader;
-    private CountDownLatch barriere;
+    private int antFlettingger;
+    private FletteBuffer fletteBuffer;
+    double startTid;
+    double sluttTid;
 
     Kontroll(String[] args) {
 	try {
 	    antTraader = Integer.parseInt(args[0]);
-	    barriere = new CountDownLatch(antTraader);
 	    sorteringstraader = new SorteringsTraad[antTraader];
+	    fletteBuffer = new FletteBuffer();
 	    inFil = new File(args[1]);
 	    lesFil();
-	    //System.out.println("lest fil");
 	    utFil = new File(args[2]);
-	    double startTid = System.nanoTime()/1000000;
+	    startTid = System.nanoTime()/1000000;
 	    fordel();
-	    //System.out.println("Fordelt");
-	    sorter();
-	    flett();
-	    double sluttTid = System.nanoTime()/1000000;
-	    System.out.println("Kjoeretid: " + (sluttTid - startTid) +  " ms");
+	    vent();
+	    skriv();
 	}
 
 	catch (FileNotFoundException e) {
@@ -46,61 +45,44 @@ class Kontroll extends Thread{
 
     //oppretter traader og fordeler ord mellom dem
     private void fordel() {
+	int rest = alleOrd.length % antTraader;
 	int ordPerTraad = alleOrd.length / antTraader;
-	SorteringsTraad forrigeTraad = new SorteringsTraad(null, this, null);
 	
 	for (int i = 0; i < antTraader; i++) {
 	    String[] ord = new String[ordPerTraad];
-	    for (int j = 0; j < ordPerTraad; j++) {
+	    if (i == antTraader - 1) {
+		ord = new String[ordPerTraad + rest];
+	    }
+	    for (int j = 0; j < ord.length; j++) {
 		ord[j] = alleOrd[i * ordPerTraad + j];
 	    }
-	    sorteringstraader[i] = new SorteringsTraad(ord, this, barriere);
-	    forrigeTraad.setPartner(sorteringstraader[i]);
-	    forrigeTraad = sorteringstraader[i];
-	}
-    }
-
-    private void sorter() {
-	boolean ferdigSortert = false;
-	for (int i = 0; i < sorteringstraader.length; i++) {
+	    sorteringstraader[i] = new SorteringsTraad(ord, fletteBuffer);
 	    sorteringstraader[i].start();
 	}
-	try {
-	    barriere.await();
-	}
-	catch (Exception e) {
-	    e.printStackTrace();
-	}
-    }
-	    
+    }	    
        
-    private void flett() {
-	//System.out.println("Naa skal det flettes gitt");
-	while (sorteringstraader.length > 1) {
-	    barriere = new CountDownLatch(sorteringstraader.length/2);
-	    SorteringsTraad[] ny = new SorteringsTraad[(int)Math.ceil(sorteringstraader.length / 2.0)]; 
+    public void skriv() {
+	sluttTid = System.nanoTime() / 1000000;
+	//fletteBuffer.getFerdig().skriv();
+	System.out.println("Kjoeretid: " + (sluttTid - startTid) + " ms ");
+    }
 
-	    for (int i = 0; i < sorteringstraader.length; i+=2) {
-		ny[(int)Math.ceil(i/2.0)] = sorteringstraader[i];
-		sorteringstraader[i].flett(barriere);
-		if (i < sorteringstraader.length-2) {
-		    sorteringstraader[i].setPartner(sorteringstraader[i+2]);
-		}
-	    }
-	    sorteringstraader = ny;
-	    
-	    //venter mellom hver fletterunde
-	    try {
-		barriere.await();
-	    }
-	    catch (Exception e) {
-		e.printStackTrace();
-	    }
+    private void vent() {
+	while (!fletteBuffer.ferdig()) {
+	    fletteBuffer.vent();
 	}
     }
-    public void skriv() {
-	sorteringstraader[0].skriv();
-    }
-}	    
+
+//     private void sjekk() {
+// 	String[] sjekk = fletteBuffer.getFerdig().getOrd();
+
+// 	String ord = sjekk[0];
+// 	for (int i = 1; i < sjekk.length; i++) {
+// 	    if (sjekk[i].compareTo(ord) <= 0) {
+// 		System.out.println("Au da");
+// 	    }
+// 	}
+//     }
+}
 	    
 	

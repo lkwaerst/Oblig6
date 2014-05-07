@@ -1,0 +1,6 @@
+1. Sortering og fletting kan gå I paralell, alt annet (innlesing, skriving, fordeling) gjøres av main tråden.
+
+2. 
+
+
+Programmet 
