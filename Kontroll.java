@@ -22,7 +22,7 @@ class Kontroll extends Thread{
 	    inFil = new File(args[1]);
 	    lesFil();
 	    utFil = new File(args[2]);
-	    startTid = System.nanoTime()/1000000;
+	    startTid = System.nanoTime() / 1000000;
 	    fordel();
 	    flettetFerdig.await();
 	    skriv();
@@ -57,6 +57,7 @@ class Kontroll extends Thread{
 	
 	for (int i = 0; i < antTraader; i++) {
 	    String[] ord = new String[ordPerTraad];
+	    //dumper resten paa siste traaden
 	    if (i == antTraader - 1) {
 		ord = new String[ordPerTraad + rest];
 	    }

@@ -1,5 +1,4 @@
 import java.util.concurrent.*;
-import java.util.Arrays;
 class SorteringsTraad extends Thread {
     
     static int tall = 0;
@@ -44,6 +43,19 @@ class SorteringsTraad extends Thread {
 	}
 	return plass;
     }
+
+//     private void sorter() {
+// 	for (int i = 0; i < ord.length; i++) {
+// 	    for (int j = i; j < ord.length; j++) {
+		
+// 		if (ord[i].compareTo(ord[j]) > 0) {
+// 		    String ja = ord[i];
+// 		    ord[i] = ord[j];
+// 		    ord[j] = ord[i];
+// 		}
+// 	    }
+// 	}
+//     }
 
     public void setPartner(SorteringsTraad s) {
 	//System.out.println("Traad " + nr + " fikk Traad " + s.nr + " som partner");

@@ -1,6 +1,16 @@
 1. Sortering og fletting kan gå I paralell, alt annet (innlesing, skriving, fordeling) gjøres av main tråden.
 
-2. 
+2.  Noen tider målt fra programmet er ferdig med å lese fra fil, til programmet er ferdig med å sortere og flette:
 
+    sowpods.txt:    		      	     names.txt:                                      
 
-Programmet 
+    4 tråder: 71 s			     4 tråder: 49 ms			
+    8 tråder: 18,4 s			     8 tråder: 31 ms
+    16 tråader:5,8 s			     16 tråder: 43 ms
+    32 tråder: 2 s 			     32 tråder: 61 ms
+    64 tråder: 0,69 s			     64 tråder: 91 ms
+    128 tråder: 426 ms			     
+    256 tråder: 372 ms
+    516 tråder: 527 ms
+    1024 tråder: 754 ms
+
