@@ -1,4 +1,5 @@
 import java.util.concurrent.*;
+import java.util.Arrays;
 class SorteringsTraad extends Thread {
     
     static int tall = 0;
@@ -7,12 +8,16 @@ class SorteringsTraad extends Thread {
     private SorteringsTraad flettePartner;
     private boolean fletteklar = false;
     private FletteBuffer fletteBuffer;
+    private CountDownLatch flettetFerdig;
+    private boolean lever = true;
 
-    SorteringsTraad(String[] ord, FletteBuffer f) {
+    SorteringsTraad(String[] ord, FletteBuffer f, CountDownLatch ferdig) {
 	fletteBuffer = f;
 	nr = tall;
 	tall++;
 	this.ord = ord;
+	flettetFerdig = ferdig;
+	
     }
 
     public void run() {
@@ -21,9 +26,9 @@ class SorteringsTraad extends Thread {
 	    sortert[finnPlass(ord[i])] = ord[i];
 	}
 	ord = sortert;
-	fletteBuffer.add(this, false); //klar for fletting
+	fletteBuffer.add(this); //klar for fletting
 	
-	while (!fletteBuffer.ferdig()) {
+	while (lever) {
 	    fletteBuffer.vent();
 	    flett();
 	}
@@ -68,11 +73,16 @@ class SorteringsTraad extends Thread {
 	}
 	ord = nyArray;
 	fletteklar = false;
-	fletteBuffer.add(this, true);
+	flettetFerdig.countDown();
+	fletteBuffer.add(this);
     }
 
     public String[] getOrd() {
 	return ord;
+    }
+
+    public void drep() {
+	lever = false;
     }
 
     public void skriv() {

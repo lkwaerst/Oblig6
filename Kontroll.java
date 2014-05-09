@@ -3,13 +3,13 @@ import java.util.*;
 import java.io.*;
 class Kontroll extends Thread{
 
-    static int antTraader;
-    File inFil;
-    File utFil;
-    String[] alleOrd;
-    SorteringsTraad[] sorteringstraader;
-    private int antFlettingger;
+    private static int antTraader;
+    private File inFil;
+    private File utFil;
+    private String[] alleOrd;
+    private SorteringsTraad[] sorteringstraader;
     private FletteBuffer fletteBuffer;
+    private CountDownLatch flettetFerdig;
     double startTid;
     double sluttTid;
 
@@ -17,18 +17,25 @@ class Kontroll extends Thread{
 	try {
 	    antTraader = Integer.parseInt(args[0]);
 	    sorteringstraader = new SorteringsTraad[antTraader];
+	    flettetFerdig = new CountDownLatch(antTraader - 1);
 	    fletteBuffer = new FletteBuffer();
 	    inFil = new File(args[1]);
 	    lesFil();
 	    utFil = new File(args[2]);
 	    startTid = System.nanoTime()/1000000;
 	    fordel();
-	    vent();
+	    flettetFerdig.await();
 	    skriv();
+	    System.exit(0);
 	}
 
 	catch (FileNotFoundException e) {
 	    System.out.println("Fant ikke en fil");
+	}
+	
+	catch (IOException e) {
+	    System.out.println("IO feil");
+	    e.printStackTrace();
 	}
 	catch (Exception e) {
 	    e.printStackTrace();
@@ -56,21 +63,21 @@ class Kontroll extends Thread{
 	    for (int j = 0; j < ord.length; j++) {
 		ord[j] = alleOrd[i * ordPerTraad + j];
 	    }
-	    sorteringstraader[i] = new SorteringsTraad(ord, fletteBuffer);
+	    sorteringstraader[i] = new SorteringsTraad(ord, fletteBuffer, flettetFerdig);
 	    sorteringstraader[i].start();
 	}
     }	    
        
-    public void skriv() {
+    public void skriv() throws Exception {
 	sluttTid = System.nanoTime() / 1000000;
-	//fletteBuffer.getFerdig().skriv();
-	System.out.println("Kjoeretid: " + (sluttTid - startTid) + " ms ");
-    }
-
-    private void vent() {
-	while (!fletteBuffer.ferdig()) {
-	    fletteBuffer.vent();
+	PrintWriter skriv = new PrintWriter(new FileWriter(utFil));
+	String[] ord = fletteBuffer.getFerdig().getOrd();
+	
+	for (int i = 0; i < ord.length; i++) {
+	    skriv.println(ord[i]);
 	}
+	skriv.close();
+	System.out.println("Kjoeretid: " + (sluttTid - startTid) + " ms ");
     }
 
 //     private void sjekk() {
