@@ -9,9 +9,7 @@ class Kontroll extends Thread{
     private String[] alleOrd;
     private SorteringsTraad[] sorteringstraader;
     private FletteBuffer fletteBuffer;
-    private CountDownLatch flettetFerdig;
-    double startTid;
-    double sluttTid;
+    private CountDownLatch flettetFerdig;   //brukes til å få maintraaden til aa vente paa fletting
 
     Kontroll(String[] args) {
 	try {
@@ -20,11 +18,11 @@ class Kontroll extends Thread{
 	    flettetFerdig = new CountDownLatch(antTraader - 1);
 	    fletteBuffer = new FletteBuffer();
 	    inFil = new File(args[1]);
-	    lesFil();
 	    utFil = new File(args[2]);
-	    startTid = System.nanoTime() / 1000000;
+
+	    lesFil();
 	    fordel();
-	    flettetFerdig.await();
+	    flettetFerdig.await(); 
 	    skriv();
 	    System.exit(0);
 	}
@@ -37,6 +35,12 @@ class Kontroll extends Thread{
 	    System.out.println("IO feil");
 	    e.printStackTrace();
 	}
+	catch (ArrayIndexOutOfBoundsException e) {
+	    System.out.println("Feil ant ord i filen");
+	}
+	catch (FeilOrdTallException e) {
+	    System.out.println("Feil ant ord i filen");
+	}
 	catch (Exception e) {
 	    e.printStackTrace();
 	}	
@@ -47,6 +51,9 @@ class Kontroll extends Thread{
 	alleOrd = new String[Integer.parseInt(les.next())];
 	for (int i = 0; les.hasNext(); i++) {
 	    alleOrd[i] = les.next();
+	}
+	if (alleOrd[alleOrd.length - 1] == null) {
+	    throw new FeilOrdTallException();
 	}
     }
 
@@ -67,10 +74,10 @@ class Kontroll extends Thread{
 	    sorteringstraader[i] = new SorteringsTraad(ord, fletteBuffer, flettetFerdig);
 	    sorteringstraader[i].start();
 	}
-    }	    
-       
+    }      
+    
+    //skriver ordene til foerste traad i bufferen til utfilen
     public void skriv() throws Exception {
-	sluttTid = System.nanoTime() / 1000000;
 	PrintWriter skriv = new PrintWriter(new FileWriter(utFil));
 	String[] ord = fletteBuffer.getFerdig().getOrd();
 	
@@ -78,19 +85,11 @@ class Kontroll extends Thread{
 	    skriv.println(ord[i]);
 	}
 	skriv.close();
-	System.out.println("Kjoeretid: " + (sluttTid - startTid) + " ms ");
     }
+}
 
-//     private void sjekk() {
-// 	String[] sjekk = fletteBuffer.getFerdig().getOrd();
 
-// 	String ord = sjekk[0];
-// 	for (int i = 1; i < sjekk.length; i++) {
-// 	    if (sjekk[i].compareTo(ord) <= 0) {
-// 		System.out.println("Au da");
-// 	    }
-// 	}
-//     }
+class FeilOrdTallException extends Exception {
 }
 	    
 	

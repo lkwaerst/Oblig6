@@ -14,3 +14,5 @@
     516 tråder: 527 ms
     1024 tråder: 754 ms
 
+Alt funker bra
+

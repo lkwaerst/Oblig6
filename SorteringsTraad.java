@@ -1,19 +1,15 @@
 import java.util.concurrent.*;
 class SorteringsTraad extends Thread {
     
-    static int tall = 0;
-    int nr;
     private String[] ord;
     private SorteringsTraad flettePartner;
-    private boolean fletteklar = false;
+    private boolean fletteklar = false;   //hindrer traader som ikke skal flettes i aa flettes
     private FletteBuffer fletteBuffer;
     private CountDownLatch flettetFerdig;
     private boolean lever = true;
 
     SorteringsTraad(String[] ord, FletteBuffer f, CountDownLatch ferdig) {
 	fletteBuffer = f;
-	nr = tall;
-	tall++;
 	this.ord = ord;
 	flettetFerdig = ferdig;
 	
@@ -44,21 +40,8 @@ class SorteringsTraad extends Thread {
 	return plass;
     }
 
-//     private void sorter() {
-// 	for (int i = 0; i < ord.length; i++) {
-// 	    for (int j = i; j < ord.length; j++) {
-		
-// 		if (ord[i].compareTo(ord[j]) > 0) {
-// 		    String ja = ord[i];
-// 		    ord[i] = ord[j];
-// 		    ord[j] = ord[i];
-// 		}
-// 	    }
-// 	}
-//     }
-
+    //forteller traaden hvilken traad den skal flette med
     public void setPartner(SorteringsTraad s) {
-	//System.out.println("Traad " + nr + " fikk Traad " + s.nr + " som partner");
 	flettePartner = s;
 	fletteklar = true;
     }
@@ -86,7 +69,7 @@ class SorteringsTraad extends Thread {
 	ord = nyArray;
 	fletteklar = false;
 	flettetFerdig.countDown();
-	fletteBuffer.add(this);
+	fletteBuffer.add(this); //klar for ny fletting
     }
 
     public String[] getOrd() {
@@ -95,12 +78,5 @@ class SorteringsTraad extends Thread {
 
     public void drep() {
 	lever = false;
-    }
-
-    public void skriv() {
-	for (int i = 0; i < ord.length; i++) {
-	    System.out.println(ord[i]);
-	}
-	System.out.println("Antall ord: " + ord.length);
     }
 }
